@@ -2,7 +2,7 @@ k-means-in-python
 ====
 
 ## Overview
-・K-means example in python
+・K-means in python
 
 ## Description
 
@@ -16,8 +16,8 @@ Iter :  3  Quantization Error :  261.264711188  Diff :  9.21805616624
 Iter :  4  Quantization Error :  260.016662684  Diff :  1.24804850477
 Iter :  5  Quantization Error :  260.016662684  Diff :  0.0
 ```
-
-## Example
+## Licence
+Licensed under the [MIT](http://opensource.org/licenses/MIT) license.
 
 ## Author
-[fisproject](https://github.com/fisproject)
+[ttsy](https://github.com/fisproject)
