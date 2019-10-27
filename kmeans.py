@@ -1,10 +1,11 @@
-#!/bin/python
 # -*- coding: utf-8 -*-
 
 import sys
+
 import numpy as np
 import sklearn.decomposition as decop
 import matplotlib.pyplot as plt
+
 
 # 標準化
 def scale(data):
@@ -12,10 +13,11 @@ def scale(data):
     mu = np.mean(data, axis=0)
     sigma = np.std(data, axis=0)
 
-    for i in xrange(col):
-        data[:,i] = (data[:,i] - mu[i]) / sigma[i]
+    for i in range(col):
+        data[:, i] = (data[:, i] - mu[i]) / sigma[i]
 
     return data
+
 
 class Kmeans(object):
     def __init__(self, data, clusters):
@@ -28,17 +30,17 @@ class Kmeans(object):
 
     # 所属クラスタの割り当て : 各piを固定して, eを∂について最小化する
     def clustering(self):
-        for n in xrange(self.N):
+        for n in range(self.N):
             i = -1
-            min_ = sys.maxint
+            min_ = sys.maxsize
 
-            for k in xrange(self.K):
+            for k in range(self.K):
                 tmp = np.linalg.norm(self.X[n] - self.mean[k]) ** 2
                 if tmp < min_:
                     i = k
                     min_ = tmp
 
-            for k in xrange(self.K):
+            for k in range(self.K):
                 if k == i:
                     self.r[n, k] = 1
                 else:
@@ -47,10 +49,10 @@ class Kmeans(object):
 
     # 平均ベクトルの算出 : 各∂iを固定して, eをpについて最小化する
     def mean_vec(self):
-        for k in xrange(self.K):
+        for k in range(self.K):
             numerator = 0.0
             denominator = 0.0
-            for n in xrange(self.N):
+            for n in range(self.N):
                 numerator += self.r[n, k] * self.X[n]
                 denominator += self.r[n, k]
             self.mean[k] = numerator / denominator
@@ -60,8 +62,11 @@ class Kmeans(object):
     # 量子化誤差
     def error(self):
         e = 0.0
-        for n in xrange(self.N):
-            e += sum([self.r[n, k] * np.linalg.norm(self.X[n]-self.mean[k]) ** 2 for k in xrange(self.K)])
+        for n in range(self.N):
+            e += sum(
+                    [self.r[n, k] * np.linalg.norm(self.X[n]-self.mean[k]) ** 2
+                        for k in range(self.K)]
+                 )
         return e
 
     # 収束判定 : 量子化誤差の変動で収束を判定する
@@ -74,10 +79,15 @@ class Kmeans(object):
 
     # Plot Cluster
     def plot_cluster(self):
-        colors = ['g','b','r']
-        for n in xrange(self.N):
-            c = [colors[k] for k in xrange(self.K) if self.r[n, k] == 1]
-            plt.scatter(self.X[n,0], self.X[n,1], c=c, marker='o')
+        colors = ['g', 'b', 'r']
+        for n in range(self.N):
+            c = [colors[k] for k in range(self.K) if self.r[n, k] == 1]
+            plt.scatter(
+                self.X[n, 0],
+                self.X[n, 1],
+                c=c,
+                marker='o'
+            )
         plt.show()
 
     # Plot Quantization Error
@@ -87,10 +97,11 @@ class Kmeans(object):
         plt.ylabel('Quantization Error')
         plt.show()
 
+
 def main():
     # load data
     data = np.loadtxt('data/wine.data', delimiter=',')
-    X = scale(data[:,1:14])
+    X = scale(data[:, 1:14])
 
     # principal component analysis
     pca = decop.PCA(n_components=2)
@@ -107,10 +118,10 @@ def main():
 
     while True:
         # STEP 2: 所属クラスタの割り当て
-        r = km.clustering()
+        km.clustering()
 
         # STEP 3: 平均ベクトルの計算
-        mean = km.mean_vec()
+        km.mean_vec()
 
         # STEP 4: 量子化誤差の計算
         new_proto = km.error()
@@ -118,17 +129,21 @@ def main():
 
         # STEP 5: 収束判定
         res = km.check_convergence(proto, new_proto)
-        print('iter: ', iteration, ' quantization Error: ', new_proto, ' diff: ', res[1])
+        print('iter: ', iteration,
+              ' quantization Error: ', new_proto,
+              ' diff: ', res[1])
 
         km.plot_cluster()
 
         if res[0] is False:
-            proto = new_proto # 量子化誤差の保持
+            # 量子化誤差の保持
+            proto = new_proto
             iteration += 1
         else:
             break
 
     km.plot_error(err)
+
 
 if __name__ == "__main__":
     main()

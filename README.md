@@ -1,13 +1,15 @@
 k-means-in-python
-====
+===
 
 ## Overview
-K-means in python
+
+K-means in Python
 
 ## Description
 
 ## Usage
-```python
+
+```bash
 $ python kmeans.py
 ('iter: ', 0, ' quantization Error: ', 779.69608945427467, ' diff: ', 529.62363959615504)
 ('iter: ', 1, ' quantization Error: ', 363.07879685667001, ' diff: ', 416.61729259760466)
@@ -17,8 +19,11 @@ $ python kmeans.py
 ('iter: ', 5, ' quantization Error: ', 260.01666268357656, ' diff: ', 0.57874454971999967)
 ('iter: ', 6, ' quantization Error: ', 260.01666268357656, ' diff: ', 0.0)
 ```
+
 ## Licence
+
 Licensed under the [MIT](http://opensource.org/licenses/MIT) license.
 
 ## Author
-[ttsy](https://github.com/fisproject)
+
+[t2sy](https://github.com/fisproject)
