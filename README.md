@@ -11,13 +11,11 @@ K-means in Python
 
 ```bash
 $ python kmeans.py
-('iter: ', 0, ' quantization Error: ', 779.69608945427467, ' diff: ', 529.62363959615504)
-('iter: ', 1, ' quantization Error: ', 363.07879685667001, ' diff: ', 416.61729259760466)
-('iter: ', 2, ' quantization Error: ', 282.14240512661081, ' diff: ', 80.936391730059199)
-('iter: ', 3, ' quantization Error: ', 264.63561221752815, ' diff: ', 17.506792909082662)
-('iter: ', 4, ' quantization Error: ', 260.59540723329656, ' diff: ', 4.0402049842315932)
-('iter: ', 5, ' quantization Error: ', 260.01666268357656, ' diff: ', 0.57874454971999967)
-('iter: ', 6, ' quantization Error: ', 260.01666268357656, ' diff: ', 0.0)
+iter: 0, quantization Error: 335.32223626979106, diff: 963.6145242494024
+iter: 1, quantization Error: 276.80806399388865, diff: 58.51417227590241
+iter: 2, quantization Error: 262.6137317575151, diff: 14.194332236373555
+iter: 3, quantization Error: 260.0166626835768, diff: 2.5970690739383144
+iter: 4, quantization Error: 260.0166626835768, diff: 0.0
 ```
 
 ## Licence

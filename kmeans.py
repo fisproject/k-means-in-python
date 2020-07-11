@@ -1,26 +1,29 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from typing import Tuple, List
 
 import numpy as np
 import sklearn.decomposition as decop
+
+import matplotlib
+
+matplotlib.use("TkAgg")  # for macOS
 import matplotlib.pyplot as plt
 
 
 # 標準化
-def scale(data):
+def scale(data: np.ndarray) -> np.ndarray:
     col = data.shape[1]
     mu = np.mean(data, axis=0)
     sigma = np.std(data, axis=0)
-
     for i in range(col):
         data[:, i] = (data[:, i] - mu[i]) / sigma[i]
-
     return data
 
 
 class Kmeans(object):
-    def __init__(self, data, clusters):
+    def __init__(self, data: np.ndarray, clusters: int):
         self.X = data
         self.N = len(self.X)
         self.K = clusters
@@ -29,7 +32,7 @@ class Kmeans(object):
         self.r[:, 0] = 1
 
     # 所属クラスタの割り当て : 各piを固定して, eを∂について最小化する
-    def clustering(self):
+    def clustering(self) -> np.ndarray:
         for n in range(self.N):
             i = -1
             min_ = sys.maxsize
@@ -48,7 +51,7 @@ class Kmeans(object):
         return self.r
 
     # 平均ベクトルの算出 : 各∂iを固定して, eをpについて最小化する
-    def mean_vec(self):
+    def mean_vec(self) -> np.ndarray:
         for k in range(self.K):
             numerator = 0.0
             denominator = 0.0
@@ -56,51 +59,47 @@ class Kmeans(object):
                 numerator += self.r[n, k] * self.X[n]
                 denominator += self.r[n, k]
             self.mean[k] = numerator / denominator
-
         return self.mean
 
     # 量子化誤差
-    def error(self):
-        e = 0.0
+    def error(self) -> float:
+        err = 0.0
         for n in range(self.N):
-            e += sum(
-                    [self.r[n, k] * np.linalg.norm(self.X[n]-self.mean[k]) ** 2
-                        for k in range(self.K)]
-                 )
-        return e
+            err += sum(
+                [
+                    self.r[n, k] * np.linalg.norm(self.X[n] - self.mean[k]) ** 2
+                    for k in range(self.K)
+                ]
+            )
+        return err
 
     # 収束判定 : 量子化誤差の変動で収束を判定する
-    def check_convergence(self, p, np):
-        e = p - np
-        if e < 0.01:
-            return (True, e)
+    def check_convergence(self, p: float, np: float) -> Tuple[bool, float]:
+        err = p - np
+        if err < 0.01:
+            return (True, err)
         else:
-            return (False, e)
+            return (False, err)
 
     # Plot Cluster
-    def plot_cluster(self):
-        colors = ['g', 'b', 'r']
+    def plot_cluster(self) -> None:
+        colors = ["g", "b", "r"]
         for n in range(self.N):
             c = [colors[k] for k in range(self.K) if self.r[n, k] == 1]
-            plt.scatter(
-                self.X[n, 0],
-                self.X[n, 1],
-                c=c,
-                marker='o'
-            )
+            plt.scatter(self.X[n, 0], self.X[n, 1], c=c, marker="o")
         plt.show()
 
     # Plot Quantization Error
-    def plot_error(self, err):
+    def plot_error(self, err: List[float]):
         plt.plot(err)
-        plt.xlabel('Iteration')
-        plt.ylabel('Quantization Error')
+        plt.xlabel("Iteration")
+        plt.ylabel("Quantization Error")
         plt.show()
 
 
 def main():
     # load data
-    data = np.loadtxt('data/wine.data', delimiter=',')
+    data = np.loadtxt("data/wine.data", delimiter=",")
     X = scale(data[:, 1:14])
 
     # principal component analysis
@@ -114,7 +113,7 @@ def main():
     # STEP 1: 初期状態の設定
     proto = km.error()
     iteration = 0
-    err = []
+    errs = []
 
     while True:
         # STEP 2: 所属クラスタの割り当て
@@ -125,13 +124,11 @@ def main():
 
         # STEP 4: 量子化誤差の計算
         new_proto = km.error()
-        err.append(new_proto)
+        errs.append(new_proto)
 
         # STEP 5: 収束判定
         res = km.check_convergence(proto, new_proto)
-        print('iter: ', iteration,
-              ' quantization Error: ', new_proto,
-              ' diff: ', res[1])
+        print(f"iter: {iteration}, quantization Error: {new_proto}, diff: {res[1]}")
 
         km.plot_cluster()
 
@@ -142,7 +139,7 @@ def main():
         else:
             break
 
-    km.plot_error(err)
+    km.plot_error(errs)
 
 
 if __name__ == "__main__":
