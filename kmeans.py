@@ -12,7 +12,6 @@ matplotlib.use("TkAgg")  # for macOS
 import matplotlib.pyplot as plt
 
 
-# 標準化
 def scale(data: np.ndarray) -> np.ndarray:
     col = data.shape[1]
     mu = np.mean(data, axis=0)
@@ -23,16 +22,18 @@ def scale(data: np.ndarray) -> np.ndarray:
 
 
 class Kmeans(object):
-    def __init__(self, data: np.ndarray, clusters: int):
+    def __init__(self, data: np.ndarray, n_clusters: int):
         self.X = data
         self.N = len(self.X)
-        self.K = clusters
+        self.K = n_clusters
         self.mean = np.random.rand(self.K, 2)
         self.r = np.zeros((self.N, self.K))
         self.r[:, 0] = 1
 
-    # 所属クラスタの割り当て : 各piを固定して, eを∂について最小化する
     def clustering(self) -> np.ndarray:
+        """
+        所属クラスタの割り当て: 各 pi を固定して, e を ∂ について最小化
+        """
         for n in range(self.N):
             i = -1
             min_ = sys.maxsize
@@ -50,8 +51,10 @@ class Kmeans(object):
                     self.r[n, k] = 0
         return self.r
 
-    # 平均ベクトルの算出 : 各∂iを固定して, eをpについて最小化する
     def mean_vec(self) -> np.ndarray:
+        """
+        平均ベクトル: 各 ∂i を固定して, e を p について最小化
+        """
         for k in range(self.K):
             numerator = 0.0
             denominator = 0.0
@@ -61,8 +64,10 @@ class Kmeans(object):
             self.mean[k] = numerator / denominator
         return self.mean
 
-    # 量子化誤差
     def error(self) -> float:
+        """
+        量子化誤差
+        """
         err = 0.0
         for n in range(self.N):
             err += sum(
@@ -73,47 +78,51 @@ class Kmeans(object):
             )
         return err
 
-    # 収束判定 : 量子化誤差の変動で収束を判定する
-    def check_convergence(self, p: float, np: float) -> Tuple[bool, float]:
+    def convergence(self, p: float, np: float, th: float) -> Tuple[bool, float]:
+        """
+        収束判定: 量子化誤差の変動で収束を判定
+        """
         err = p - np
-        if err < 0.01:
+        if err < th:
             return (True, err)
         else:
             return (False, err)
 
-    # Plot Cluster
     def plot_cluster(self) -> None:
+        """
+        各クラスタを図示 (2次元)
+        """
         colors = ["g", "b", "r"]
         for n in range(self.N):
             c = [colors[k] for k in range(self.K) if self.r[n, k] == 1]
             plt.scatter(self.X[n, 0], self.X[n, 1], c=c, marker="o")
         plt.show()
 
-    # Plot Quantization Error
-    def plot_error(self, err: List[float]):
-        plt.plot(err)
+    def plot_errors(self, errors: List[float]) -> None:
+        """
+        量子化誤差の推移を図示
+        """
+        plt.plot(errors)
         plt.xlabel("Iteration")
         plt.ylabel("Quantization Error")
         plt.show()
 
 
 def main():
-    # load data
     data = np.loadtxt("data/wine.data", delimiter=",")
     X = scale(data[:, 1:14])
 
-    # principal component analysis
+    # principal component analysis (PCA)
     pca = decop.PCA(n_components=2)
     pca.fit(X)
     X = pca.transform(X)
 
-    # number of clusters: 3
-    km = Kmeans(data=X, clusters=3)
+    km = Kmeans(data=X, n_clusters=3)
 
     # STEP 1: 初期状態の設定
     proto = km.error()
     iteration = 0
-    errs = []
+    errors = []
 
     while True:
         # STEP 2: 所属クラスタの割り当て
@@ -124,22 +133,21 @@ def main():
 
         # STEP 4: 量子化誤差の計算
         new_proto = km.error()
-        errs.append(new_proto)
+        errors.append(new_proto)
 
         # STEP 5: 収束判定
-        res = km.check_convergence(proto, new_proto)
-        print(f"iter: {iteration}, quantization Error: {new_proto}, diff: {res[1]}")
+        is_convergence, diff = km.convergence(proto, new_proto, th=0.01)
+        print(f"iter: {iteration}, quantization error: {new_proto}, error diff: {diff}")
 
         km.plot_cluster()
 
-        if res[0] is False:
-            # 量子化誤差の保持
-            proto = new_proto
-            iteration += 1
-        else:
+        if is_convergence:
             break
+        else:
+            proto = new_proto  # 量子化誤差の更新
+            iteration += 1
 
-    km.plot_error(errs)
+    km.plot_errors(errors)
 
 
 if __name__ == "__main__":
