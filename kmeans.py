@@ -24,17 +24,16 @@ def scale(data: np.ndarray) -> np.ndarray:
 class Kmeans(object):
     def __init__(self, data: np.ndarray, n_clusters: int):
         self.X = data
-        self.N = len(self.X)
         self.K = n_clusters
         self.mean = np.random.rand(self.K, 2)
-        self.r = np.zeros((self.N, self.K))
+        self.r = np.zeros((len(self.X), self.K))
         self.r[:, 0] = 1
 
     def clustering(self) -> np.ndarray:
         """
         所属クラスタの割り当て: 各 pi を固定して, e を ∂ について最小化
         """
-        for n in range(self.N):
+        for n in range(len(self.X)):
             i = -1
             min_ = sys.maxsize
 
@@ -58,7 +57,7 @@ class Kmeans(object):
         for k in range(self.K):
             numerator = 0.0
             denominator = 0.0
-            for n in range(self.N):
+            for n in range(len(self.X)):
                 numerator += self.r[n, k] * self.X[n]
                 denominator += self.r[n, k]
             self.mean[k] = numerator / denominator
@@ -69,7 +68,7 @@ class Kmeans(object):
         量子化誤差
         """
         err = 0.0
-        for n in range(self.N):
+        for n in range(len(self.X)):
             err += sum(
                 [
                     self.r[n, k] * np.linalg.norm(self.X[n] - self.mean[k]) ** 2
@@ -93,7 +92,7 @@ class Kmeans(object):
         各クラスタを図示 (2次元)
         """
         colors = ["g", "b", "r"]
-        for n in range(self.N):
+        for n in range(len(self.X)):
             c = [colors[k] for k in range(self.K) if self.r[n, k] == 1]
             plt.scatter(self.X[n, 0], self.X[n, 1], c=c, marker="o")
         plt.show()
